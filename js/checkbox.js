@@ -62,14 +62,11 @@
 		setState: function( $chk ) {
 			$chk = $chk || this.$element;
 
-			this.state.disabled = Boolean( $chk.prop('disabled') );
-			this.state.checked  = Boolean( $chk.is(':checked') );
-
-			this._resetClasses();
+			this.state.checked  = Boolean($chk.is(':checked'));
+			this.state.disabled = Boolean($chk.prop('disabled'));
 
 			// set state of checkbox
-			this._toggleCheckedState();
-			this._toggleDisabledState();
+			this._resetClasses();
 
 			//toggle container
 			this.toggleContainer();
@@ -77,30 +74,30 @@
 
 		enable: function() {
 			this.state.disabled = false;
-			this.$element.attr('disabled', false);
-			this._resetClasses();
-			this.$element.trigger( 'enabled.fu.checkbox' );
+			this.$element.attr('disabled', this.state.disabled);
+			this._setDisabledClass();
+			this.$element.trigger('enabled.fu.checkbox');
 		},
 
 		disable: function() {
 			this.state.disabled = true;
-			this.$element.attr('disabled', true);
+			this.$element.attr('disabled', this.state.disabled);
 			this._setDisabledClass();
-			this.$element.trigger( 'disabled.fu.checkbox' );
+			this.$element.trigger('disabled.fu.checkbox');
 		},
 
 		check: function () {
 			this.state.checked = true;
-			this.$element.prop('checked', true);
+			this.$element.prop('checked', this.state.checked);
 			this._setCheckedClass();
-			this.$element.trigger( 'checked.fu.checkbox' );
+			this.$element.trigger('checked.fu.checkbox');
 		},
 
 		uncheck: function () {
 			this.state.checked = false;
-			this.$element.prop('checked', false);
-			this._resetClasses();
-			this.$element.trigger( 'unchecked.fu.checkbox' );
+			this.$element.prop('checked', this.state.checked);
+			this._setCheckedClass();
+			this.$element.trigger('unchecked.fu.checkbox');
 		},
 
 		isChecked: function () {
@@ -108,25 +105,23 @@
 		},
 
 		toggle: function() {
-			this.state.checked = !this.state.checked;
-
-			this._toggleCheckedState();
-		},
-
-		toggleContainer: function(){
-			if( Boolean( this.$toggleContainer ) ) {
-				if( this.state.checked ) {
-					this.$toggleContainer.removeClass('hide');
-					this.$toggleContainer.attr('aria-hidden', 'false');
-				}else {
-					this.$toggleContainer.addClass('hide');
-					this.$toggleContainer.attr('aria-hidden', 'true');
-				}
+			if (this.state.checked) {
+				this.uncheck();
+			} else {
+				this.check();
 			}
 		},
 
-		itemchecked: function( element ) {
-			this.setState( $( element.target ) );
+		toggleContainer: function() {
+			if (Boolean(this.$toggleContainer)) {
+				this.$toggleContainer.toggleClass('hide', this.state.checked);
+				this.$toggleContainer.attr('aria-hidden', this.state.checked.toString());
+			}
+		},
+
+		itemchecked: function(element) {
+			this.toggle();
+			this.toggleContainer();
 		},
 
 		destroy: function() {
@@ -139,54 +134,23 @@
 		},
 
 		_resetClasses: function() {
-			var classesToRemove = [];
-
-			if( !this.state.checked ) {
-				classesToRemove.push( 'checked' );
-			}
-
-			if( !this.state.disabled ) {
-				classesToRemove.push( 'disabled' );
-			}
-
-			classesToRemove = classesToRemove.join( ' ' );
-
-			this.$label.removeClass( classesToRemove );
-
-			if( this.$parent ) {
-				this.$parent.removeClass( classesToRemove );
-			}
-		},
-
-		_toggleCheckedState: function() {
-			if( this.state.checked ) {
-				this.check();
-			} else {
-				this.uncheck();
-			}
-		},
-
-		_toggleDisabledState: function() {
-			if( this.state.disabled ) {
-				this.disable();
-			} else {
-				this.enable();
-			}
+			this._setCheckedClass();
+			this._setDisabledClass();
 		},
 
 		_setCheckedClass: function() {
-			this.$label.addClass('checked');
+			this.$label.toggleClass('checked', this.state.checked);
 
 			if( this.$parent ) {
-				this.$parent.addClass('checked');
+				this.$parent.toggleClass('checked', this.state.checked);
 			}
 		},
 
 		_setDisabledClass: function() {
-			this.$label.addClass('disabled');
+			this.$label.toggleClass('disabled', this.state.disabled);
 
 			if( this.$parent ){
-				this.$parent.addClass('disabled');
+				this.$parent.toggleClass('disabled', this.state.disabled);
 			}
 		}
 	};
